@@ -6,7 +6,7 @@
 # Pour tester localement
 param
 (
-        [String]$sourceDir = 'C:\\Users\\infol\\source\\repos\\SPFS-FRW\\Sources\\FRW.SV.GestionFormulaires.Tests\\mdat\\\tttt',
+        [String]$sourceDir,
         [String]$apiSiteWeb = 'QA',
         [String]$noPublicSystemeAutorise = 'B4CF56AE-8F79-413C-939C-71F1DA4BC807', 
         [String]$apiKey = 'JFEsvQ6ALUzLbhsVaJUM9MtMbLnLUpcfYd7NS5GLYXDuRWpFZNw5rKt45J3L'
@@ -25,10 +25,10 @@ if(-not (Test-Path $sourceDir))
 
 $tempPath = $env:AGENT_TEMPDIRECTORY
 if (-not $tempPath){
-	$tempPath = "C:\Windows\Temp"
+	$tempPath = $env:TEMP
 }
 $guid = [guid]::NewGuid()
-$tempZipFilename = "$tempPath\$guid.zip"
+$tempZipFilename = Join-Path $tempPath $guid.zip
 
 Write-Output "Fichier Zip: $tempZipFilename"
 Write-Output "Compression des fichiers..."
