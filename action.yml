@@ -1,0 +1,69 @@
+name: 'HTTP Request Action'
+description: 'Create any HTTP Request'
+inputs:
+    url:
+        description: 'Request URL'
+        required: true
+    method:
+        description: 'Request Method'
+        required: false
+        default: 'POST'
+    contentType:
+        description: 'Content Type'
+        required: false
+    data:
+        description: 'Request Body as JSON String'
+        required: false
+        default: '{}'
+    files:
+        description: 'Map of absolute file paths as JSON String'
+        required: false
+        default: '{}'
+    file:
+        description: 'A single absolute file path'
+        required: false
+    username:
+        description: 'Auth Username'
+        required: false
+    password:
+        description: 'Auth Password'
+        required: false
+    timeout:
+        description: 'Request Timeout in Sec'
+        required: false
+        default: '5000'
+    bearerToken:
+        description: 'Bearer Authentication Token'
+        required: false
+    customHeaders:
+        description: 'Custom HTTP Headers'
+        required: false
+    preventFailureOnNoResponse:
+        description: 'Prevent this Action to fail if the request respond without an response'
+        required: false
+    ignoreStatusCodes:
+        description: 'Prevent this Action to fail if the request respond with one of the configured StatusCodes'
+        required: false
+    escapeData:
+        description: 'Escape newlines in data string content'
+        required: false
+    httpsCA:
+        description: 'Certificate authority as string in PEM format'
+        required: false
+    responseFile:
+        description: 'Persist the response data to the specified file path'
+        required: false
+    retry:
+        description: 'optional amount of retries if the request fails'
+        required: false
+    retryWait:
+        description: 'wait time between retries in milliseconds'
+        required: false
+outputs:
+    response:
+        description: 'HTTP Response Content'
+    headers:
+        description: 'HTTP Response Headers'
+runs:
+    using: 'node16'
+    main: 'dist/index.js'
