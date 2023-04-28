@@ -32,7 +32,8 @@ if (-not $tempPath){
 }
 
 $guid = [guid]::NewGuid()
-$tempZipFilename = Join-Path $tempPath $guid.zip
+$guid += '.zip'
+$tempZipFilename = Join-Path $tempPath $guid
 
 Write-Output "Fichier Zip: $tempZipFilename"
 Write-Output "Compression des fichiers..."
