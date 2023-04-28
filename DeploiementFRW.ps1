@@ -14,7 +14,7 @@ param
 
 Write-Host "==================================="
 Write-Host "= Utilitaire de deploiement FRW   ="
-Write-Host "= Copyright MTESS 2022            ="
+Write-Host "= Copyright MTESS 2022 - 2023     ="
 Write-Host "==================================="
 Write-Host "Repertoire source: $sourceDir"
 
