@@ -47,7 +47,7 @@ Write-Output "Deploiement des formulaires vers FRW..."
 
 Write-Output "Convertir Base64"
 
-if($PSVersionTable.PSversion.Major == "6")
+if($PSVersionTable.PSversion.Major -eq "6")
 {
     $zip = [convert]::ToBase64String((Get-Content -path $tempZipFilename -AsByteStream -Raw))
 }else{
