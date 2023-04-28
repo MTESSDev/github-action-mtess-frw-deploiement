@@ -1,5 +1,5 @@
-name: 'HTTP Request Action'
-description: 'Create any HTTP Request'
+name: 'MTESS - Déployer formulaire web Github Action'
+description: 'Une extension simple pour déployer ses formulaires FRW.'
 inputs:
     repertoire:
         description: 'Répertoire'
