@@ -3,18 +3,21 @@ description: 'Create any HTTP Request'
 inputs:
     repertoire:
         description: 'Répertoire'
-        required: true
-    method:
-        description: 'Request Method'
+        required: false
+        default: '${{ github.workspace }}'
+    environnement:
+        description: 'QA, PROD, ou url complète'
         required: false
         default: 'QA'
-outputs:
-    response:
-        description: 'HTTP Response Content'
-    headers:
-        description: 'HTTP Response Headers'
+    noPublicSystemeAutorise:
+        description: 'Numéro public de système autorisé'
+        required: true
+    apiKey:
+        description: 'Clée API'
+        required: true
+
 runs:
   using: "composite"
   steps:
-    - run: ${{ github.action_path }}/DeploiementFRW.ps1 -sourceDir ${{ inputs.repertoire }} 
+    - run: ${{ github.action_path }}/DeploiementFRW.ps1 -sourceDir ${{ inputs.repertoire }} -apiSiteWeb ${{ inputs.environnement }} -noPublicSystemeAutorise ${{ inputs.noPublicSystemeAutorise }} -apiKey ${{ inputs.apiKey }}
       shell: pwsh
