@@ -25,8 +25,12 @@ if(-not (Test-Path $sourceDir))
 
 $tempPath = $env:AGENT_TEMPDIRECTORY
 if (-not $tempPath){
+	$tempPath = $env:RUNNER_TEMP
+}
+if (-not $tempPath){
 	$tempPath = $env:TEMP
 }
+
 $guid = [guid]::NewGuid()
 $tempZipFilename = Join-Path $tempPath $guid.zip
 
