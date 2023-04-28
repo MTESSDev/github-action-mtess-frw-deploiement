@@ -8,8 +8,8 @@ param
 (
         [String]$sourceDir,
         [String]$apiSiteWeb = 'QA',
-        [String]$noPublicSystemeAutorise = 'B4CF56AE-8F79-413C-939C-71F1DA4BC807', 
-        [String]$apiKey = 'JFEsvQ6ALUzLbhsVaJUM9MtMbLnLUpcfYd7NS5GLYXDuRWpFZNw5rKt45J3L'
+        [String]$noPublicSystemeAutorise,
+        [String]$apiKey
 )
 
 Write-Host "==================================="
