@@ -22,14 +22,6 @@ GitHub Action pour déployer des formulaires FRW vers les environnements MTESS.
 | `noPublicSystemeAutorise` | Oui | — | GUID du système autorisé |
 | `apiKey` | Oui | — | Clée d'API du système |
 
-## Environnements disponibles
-
-| Valeur | URL |
-|---|---|
-| `QA` | https://formulaires.it.mtess.gouv.qc.ca |
-| `PROD` | https://formulaires.mtess.gouv.qc.ca |
-| URL complète | Utilise l'URL fournie directement |
-
 ## Configuration des secrets
 
 Les valeurs sensibles doivent être configurées comme secrets dans votre dépôt GitHub :
