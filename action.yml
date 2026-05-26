@@ -2,7 +2,7 @@ name: 'MTESS - Déployer formulaire web Github Action'
 description: 'Une extension simple pour déployer ses formulaires FRW.'
 inputs:
     repertoire:
-        description: 'Répertoire'
+        description: 'Répertoire contenant les formulaires à déployer'
         required: false
         default: '${{ github.workspace }}'
     environnement:
@@ -10,14 +10,19 @@ inputs:
         required: false
         default: 'QA'
     noPublicSystemeAutorise:
-        description: 'Numéro public de système autorisé'
+        description: 'Numéro public de système autorisé (GUID)'
         required: true
     apiKey:
-        description: 'Clée API'
+        description: 'Clée API — utiliser un secret GitHub (ex: ${{ secrets.FRW_API_KEY }})'
         required: true
 
 runs:
   using: "composite"
   steps:
-    - run: ${{ github.action_path }}/DeploiementFRW.ps1 -sourceDir ${{ inputs.repertoire }} -apiSiteWeb ${{ inputs.environnement }} -noPublicSystemeAutorise ${{ inputs.noPublicSystemeAutorise }} -apiKey ${{ inputs.apiKey }}
+    - run: ${{ github.action_path }}/DeploiementFRW.ps1
       shell: pwsh
+      env:
+        FRWDEPLOY_SOURCE_DIR: ${{ inputs.repertoire }}
+        FRWDEPLOY_ENVIRONNEMENT: ${{ inputs.environnement }}
+        FRWDEPLOY_NO_PUBLIC: ${{ inputs.noPublicSystemeAutorise }}
+        FRWDEPLOY_API_KEY: ${{ inputs.apiKey }}

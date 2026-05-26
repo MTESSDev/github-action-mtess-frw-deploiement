@@ -1,16 +1,16 @@
-#$sourceDir = Get-VstsInput -name "sourceDir"
-#$apiSiteWeb = Get-VstsInput -name "apiSiteWeb"
-#$noPublicSystemeAutorise = Get-VstsInput -name "noPublicSystemeAutorise"
-#$apiKey = Get-VstsInput -name "apiKey"
-
-# Pour tester localement
 param
 (
-        [String]$sourceDir,
-        [String]$apiSiteWeb = 'QA',
-        [String]$noPublicSystemeAutorise,
-        [String]$apiKey
+    [String]$sourceDir,
+    [String]$apiSiteWeb = 'QA',
+    [String]$noPublicSystemeAutorise,
+    [String]$apiKey
 )
+
+# Variables d'environnement prioritaires (GitHub Actions via env: dans action.yml)
+if ($env:FRWDEPLOY_SOURCE_DIR)   { $sourceDir = $env:FRWDEPLOY_SOURCE_DIR }
+if ($env:FRWDEPLOY_ENVIRONNEMENT) { $apiSiteWeb = $env:FRWDEPLOY_ENVIRONNEMENT }
+if ($env:FRWDEPLOY_NO_PUBLIC)    { $noPublicSystemeAutorise = $env:FRWDEPLOY_NO_PUBLIC }
+if ($env:FRWDEPLOY_API_KEY)      { $apiKey = $env:FRWDEPLOY_API_KEY }
 
 Write-Host "==================================="
 Write-Host "= Utilitaire de deploiement FRW   ="
@@ -24,16 +24,11 @@ if(-not (Test-Path $sourceDir))
 }
 
 $tempPath = $env:AGENT_TEMPDIRECTORY
-if (-not $tempPath){
-	$tempPath = $env:RUNNER_TEMP
-}
-if (-not $tempPath){
-	$tempPath = $env:TEMP
-}
+if (-not $tempPath) { $tempPath = $env:RUNNER_TEMP }
+if (-not $tempPath) { $tempPath = $env:TEMP }
 
 $guid = [guid]::NewGuid()
-$tempZipFilename = Join-Path $tempPath $guid
-$tempZipFilename = $tempZipFilename + '.zip'
+$tempZipFilename = Join-Path $tempPath "$guid.zip"
 
 Write-Output "Fichier Zip: $tempZipFilename"
 Write-Output "Compression des fichiers..."
@@ -44,11 +39,9 @@ $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
 
 Write-Output "Compression terminee."
 Write-Output "Deploiement des formulaires vers FRW..."
+Write-Output "Powershell version: $($PSVersionTable.PSVersion.Major)"
 
-Write-Output "Convertir Base64"
-Write-Output "Powershell version: $PSVersionTable.PSversion.Major" 
-
-if($PSVersionTable.PSversion.Major -ge 6)
+if($PSVersionTable.PSVersion.Major -ge 6)
 {
     $zip = [convert]::ToBase64String((Get-Content -path $tempZipFilename -AsByteStream -Raw))
 }else{
@@ -57,58 +50,49 @@ if($PSVersionTable.PSversion.Major -ge 6)
 
 Write-Output "Base64 fait... $($zip.Length) bytes"
 
-$Uri = ""
-
-if(-not $apiSiteWeb)
-{
-    $apiSiteWeb = "QA"
-}
+if(-not $apiSiteWeb) { $apiSiteWeb = "QA" }
 
 switch (($apiSiteWeb).ToUpper()) {
-    DEBUG { $Uri = "https://localhost:44341/api/v1/SIS/DeployerSysteme" }
-    QA { $Uri = "https://formulaires.it.mtess.gouv.qc.ca/api/v1/SIS/DeployerSysteme" }
-    PROD { $Uri = "https://formulaires.mtess.gouv.qc.ca/api/v1/SIS/DeployerSysteme" }
+    DEBUG   { $Uri = "https://localhost:44341/api/v1/SIS/DeployerSysteme" }
+    QA      { $Uri = "https://formulaires.it.mtess.gouv.qc.ca/api/v1/SIS/DeployerSysteme" }
+    PROD    { $Uri = "https://formulaires.mtess.gouv.qc.ca/api/v1/SIS/DeployerSysteme" }
     Default { $Uri = $apiSiteWeb }
 }
 
 $headers = @{
-    "X-ApiKey" = $apiKey
-    "X-NoPublicSystemeAutorise" = $noPublicSystemeAutorise
+    "X-ApiKey"                   = $apiKey
+    "X-NoPublicSystemeAutorise"  = $noPublicSystemeAutorise
 }
 
-$contentType = "application/json"
+$body = @{ zip = $zip } | ConvertTo-Json
 
-Write-Output "Convertir en json..."
-
-$body = @{
-    zip = $zip
-} | ConvertTo-Json
-
-Write-Output "Transmettre au service web..."
+Write-Output "Transmettre au service web: $Uri"
 
 try {
-    #Force Tls1.2 parce que notre serveur est très sécurisé
+    # Force TLS 1.2 pour compatibilité serveur
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $result = Invoke-RestMethod -Method Post -Uri $Uri -ContentType $contentType -Headers $headers -Body $body -ErrorVariable oErr
+    $result = Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json" -Headers $headers -Body $body
 }
 catch
 {
-    if($oErr)
-    {
-        Write-Error "Message: $oErr"
-    }
     Write-Host "Echec du transfert."
-	Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
+    Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__
     Write-Host "StatusDescription:" $_.Exception.Response.StatusDescription
-    $result = $_.Exception.Response.GetResponseStream()
-    $reader = New-Object System.IO.StreamReader($result)
-    $responseBody = $reader.ReadToEnd();
-    Write-Error "Message: $responseBody"
-
-    if ($null -ne $PSCmdlet){
-        $PSCmdlet.ThrowTerminatingError($_)
+    $responseBody = $null
+    $responseStream = if ($_.Exception.Response) { $_.Exception.Response.GetResponseStream() } else { $null }
+    if ($responseStream) {
+        $reader = New-Object System.IO.StreamReader($responseStream)
+        $responseBody = $reader.ReadToEnd()
+        $reader.Close()
     }
+    if ($responseBody) {
+        Write-Error "Reponse serveur: $responseBody"
+    }
+    Write-Error "Exception: $($_.Exception.Message)"
+}
+finally
+{
+    Remove-Item $tempZipFilename -ErrorAction SilentlyContinue
 }
 
 Write-Output "Termine."
-#Write-VstsSetResult -Result "Succeeded" -message "DONE"
