@@ -13,7 +13,7 @@ inputs:
         description: 'Numéro public de système autorisé (GUID)'
         required: true
     apiKey:
-        description: 'Clée API — utiliser un secret GitHub (ex: ${{ secrets.FRW_API_KEY }})'
+        description: 'Clée API — utiliser un secret GitHub (ex: secrets.FRW_API_KEY)'
         required: true
 
 runs:
